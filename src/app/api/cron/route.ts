@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { fetchTickers, normalizeDate } from "@/lib/arq";
+import { processAlerts } from "@/lib/alerts";
 import { ensureSchema, getSql, type Quote } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,8 @@ export async function GET(request: Request) {
         RETURNING id, book, bid, ask, quote_date, saved_at`) as Quote[];
       saved.push(rows[0]);
     }
-    return NextResponse.json({ ok: true, saved });
+    const alertsTriggered = await processAlerts(saved);
+    return NextResponse.json({ ok: true, saved, alertsTriggered });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[cron] failed:", err);

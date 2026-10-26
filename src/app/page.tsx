@@ -1,3 +1,4 @@
+import AlertsPanel from "@/components/AlertsPanel";
 import { getLatestQuotes, isUndefinedTable, type Quote } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,8 @@ function spreadPercent(ask: string, bid: string): string {
 export default async function Home() {
   const { quotes, message } = await loadQuotes();
   const latest = quotes[0];
+  const latestUsdcBid = quotes.find((q) => q.book === "usdc_ars")?.bid ?? null;
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || null;
 
   return (
     <main className="container">
@@ -75,11 +78,11 @@ export default async function Home() {
 
       <section className="cards" aria-label="Última cotización">
         <article className="card">
-          <h2>Último ask</h2>
+          <h2>ARS a USDC</h2>
           <p className="value">{latest ? formatPrice(latest.ask) : "-"}</p>
         </article>
         <article className="card">
-          <h2>Último bid</h2>
+          <h2>USDC a ARS</h2>
           <p className="value">{latest ? formatPrice(latest.bid) : "-"}</p>
         </article>
         <article className="card">
@@ -87,6 +90,8 @@ export default async function Home() {
           <p className="value small">{latest ? formatDate(latest.saved_at) : "-"}</p>
         </article>
       </section>
+
+      <AlertsPanel vapidPublicKey={vapidPublicKey} latestBid={latestUsdcBid} />
 
       {message ? <p className="notice">{message}</p> : null}
 

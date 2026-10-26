@@ -12,19 +12,32 @@ Aplicación Next.js que guarda la cotización USDC/ARS de [Arq Finance](https://
 
 | Endpoint | Descripción |
 | --- | --- |
-| `GET /api/cron` | Obtiene la cotización de Arq y la guarda. Requiere `Authorization: Bearer <CRON_SECRET>`; de lo contrario responde 401. Devuelve `{ ok: true, saved: [...] }`. |
+| `GET /api/cron` | Obtiene la cotización de Arq y la guarda. Requiere `Authorization: Bearer <CRON_SECRET>`; de lo contrario responde 401. Devuelve `{ ok: true, saved: [...], alertsTriggered }`. |
+| `GET /api/alerts` | Alertas del navegador (según la cookie `client_id`), las más recientes primero. |
+| `POST /api/alerts` | Crea una alerta `{ target, subscription }` para USDC a ARS (máximo 10 activas por navegador). |
+| `DELETE /api/alerts/[id]` | Elimina una alerta propia. |
 | `GET /api/quotes?limit=100` | Historial ordenado por `saved_at` descendente. Por defecto 100, máximo 1000 (valores inválidos se ajustan al rango 1 a 1000). Si la tabla no existe devuelve una lista vacía. |
+
+## Alertas
+
+Desde la página puedes pulsar **Programar alerta** e indicar un valor objetivo para **USDC a ARS** (el `bid` del par `usdc_ars`). Cuando el cron guarda una cotización que alcanza ese valor, el servidor envía una notificación Web Push al navegador.
+
+- **Identidad por navegador:** no hay login. Se usa una cookie `client_id` (UUID aleatorio, `httpOnly`, 1 año); cada navegador ve y gestiona solo sus alertas. Si borras las cookies, pierdes el acceso a ellas.
+- **Web Push:** funciona con la pestaña cerrada, siempre que Chrome (o el navegador) esté abierto. En iPhone solo funciona si instalas la página como PWA en la pantalla de inicio.
+- **Una sola vez:** cada alerta se dispara una vez y queda marcada como disparada; crea otra si quieres volver a recibir el aviso.
+- **Frecuencia:** las alertas se evalúan cuando corre el polling, es decir, cada 30 minutos.
+- **Claves VAPID:** requiere `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT`. Sin ellas la interfaz de alertas aparece deshabilitada y el cron omite las notificaciones sin fallar.
 
 ## Configuración local
 
 ```bash
 npm install
-cp .env.example .env.local   # completa DATABASE_URL y CRON_SECRET
-npm run db:init              # crea la tabla y el índice
+cp .env.example .env.local   # completa DATABASE_URL, CRON_SECRET y las claves VAPID
+npm run db:init              # crea las tablas y los índices
 npm run dev
 ```
 
-Genera el secreto con `openssl rand -hex 32`. Para probar el guardado manualmente:
+Genera el secreto con `openssl rand -hex 32` y las claves VAPID (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`) con `npx web-push generate-vapid-keys`. `VAPID_SUBJECT` es un contacto, por ejemplo `mailto:tu@email.com`. Para probar el guardado manualmente:
 
 ```bash
 curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron
@@ -47,7 +60,7 @@ npm run poll
 ### 2. Vercel Hobby
 
 1. Importa el repositorio en [Vercel](https://vercel.com) (plan Hobby).
-2. Define las variables de entorno `DATABASE_URL` y `CRON_SECRET`.
+2. Define las variables de entorno `DATABASE_URL`, `CRON_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` (genera las claves con `npx web-push generate-vapid-keys`).
 3. Despliega y anota la URL (`https://<tu-app>.vercel.app`).
 
 ### 3. Polling cada 30 minutos
