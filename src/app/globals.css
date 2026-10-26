@@ -1,0 +1,137 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #14171c;
+  --muted: #5d6673;
+  --border: #e1e4e9;
+  --accent: #0b7a53;
+  --notice-bg: #fff7e0;
+  --notice-text: #6b4f00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1216;
+    --surface: #181c22;
+    --text: #e8ebef;
+    --muted: #9099a6;
+    --border: #2a3039;
+    --accent: #3ecf99;
+    --notice-bg: #2b2410;
+    --notice-text: #f1d37a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  margin: 0.25rem 0 1.5rem;
+  color: var(--muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.card h2 {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.card .value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 650;
+  color: var(--accent);
+}
+
+.card .value.small {
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.notice {
+  background: var(--notice-bg);
+  color: var(--notice-text);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.num {
+  text-align: right;
+}
