@@ -1,4 +1,6 @@
 import AlertsPanel from "@/components/AlertsPanel";
+import RefreshButton from "@/components/RefreshButton";
+import { fetchTickers, type ArqTicker } from "@/lib/arq";
 import { getLatestQuotes, isUndefinedTable, type Quote } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +48,17 @@ async function loadQuotes(): Promise<LoadResult> {
   }
 }
 
+/** Live quote for the cards; null when Arq is unreachable (cards fall back to the DB). */
+async function loadLiveQuote(): Promise<ArqTicker | null> {
+  try {
+    const tickers = await fetchTickers();
+    return tickers.find((t) => t.book === "usdc_ars") ?? null;
+  } catch (err) {
+    console.error("[page] failed to fetch live quote:", err);
+    return null;
+  }
+}
+
 function formatPrice(value: string): string {
   const n = Number(value);
   return Number.isFinite(n) ? currency.format(n) : value;
@@ -64,9 +77,12 @@ function spreadPercent(ask: string, bid: string): string {
 }
 
 export default async function Home() {
-  const { quotes, message } = await loadQuotes();
+  const [{ quotes, message }, live] = await Promise.all([loadQuotes(), loadLiveQuote()]);
   const latest = quotes[0];
-  const latestUsdcBid = quotes.find((q) => q.book === "usdc_ars")?.bid ?? null;
+  const savedUsdc = quotes.find((q) => q.book === "usdc_ars");
+  const current = live ?? savedUsdc;
+  const latestUsdcBid = current?.bid ?? null;
+  const updatedAt = live ? dateTime.format(new Date()) : null;
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || null;
 
   return (
@@ -76,14 +92,23 @@ export default async function Home() {
         <p className="subtitle">Cotización guardada cada 30 minutos desde Arq Finance.</p>
       </header>
 
+      <div className="live-bar">
+        <p className="live-status">
+          {updatedAt
+            ? `Cotización en vivo · ${updatedAt}`
+            : "Sin conexión con Arq: se muestra el último valor guardado."}
+        </p>
+        <RefreshButton />
+      </div>
+
       <section className="cards" aria-label="Última cotización">
         <article className="card">
           <h2>ARS a USDC</h2>
-          <p className="value">{latest ? formatPrice(latest.ask) : "-"}</p>
+          <p className="value">{current ? formatPrice(current.ask) : "-"}</p>
         </article>
         <article className="card">
           <h2>USDC a ARS</h2>
-          <p className="value">{latest ? formatPrice(latest.bid) : "-"}</p>
+          <p className="value">{current ? formatPrice(current.bid) : "-"}</p>
         </article>
         <article className="card">
           <h2>Último guardado</h2>

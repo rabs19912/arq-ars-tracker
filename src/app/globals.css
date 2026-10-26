@@ -252,3 +252,17 @@ tbody tr:last-child td {
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+.live-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.live-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
