@@ -89,7 +89,7 @@ export default async function Home() {
     <main className="container">
       <header>
         <h1>Arq USDC/ARS Tracker</h1>
-        <p className="subtitle">Cotización guardada cada 30 minutos desde Arq Finance.</p>
+        <p className="subtitle">Cotización guardada cada 10 minutos desde Arq Finance.</p>
       </header>
 
       <div className="live-bar">

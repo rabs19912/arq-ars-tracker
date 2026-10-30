@@ -1,6 +1,6 @@
 # Arq USDC/ARS Tracker
 
-Aplicación Next.js que guarda la cotización USDC/ARS de [Arq Finance](https://api.arqfinance.com/v1/tickers?currencies=ARS) cada 30 minutos en una base de datos Postgres (Neon) y muestra el historial en una página web. Pensada para correr gratis en Vercel Hobby + Neon Free.
+Aplicación Next.js que guarda la cotización USDC/ARS de [Arq Finance](https://api.arqfinance.com/v1/tickers?currencies=ARS) cada 10 minutos en una base de datos Postgres (Neon) y muestra el historial en una página web. Pensada para correr gratis en Vercel Hobby + Neon Free.
 
 ## Qué hace
 
@@ -25,7 +25,7 @@ Desde la página puedes pulsar **Programar alerta** e indicar un valor objetivo 
 - **Identidad por navegador:** no hay login. Se usa una cookie `client_id` (UUID aleatorio, `httpOnly`, 1 año); cada navegador ve y gestiona solo sus alertas. Si borras las cookies, pierdes el acceso a ellas.
 - **Web Push:** funciona con la pestaña cerrada, siempre que Chrome (o el navegador) esté abierto. En iPhone solo funciona si instalas la página como PWA en la pantalla de inicio.
 - **Una sola vez:** cada alerta se dispara una vez y queda marcada como disparada; crea otra si quieres volver a recibir el aviso.
-- **Frecuencia:** las alertas se evalúan cuando corre el polling, es decir, cada 30 minutos.
+- **Frecuencia:** las alertas se evalúan cuando corre el polling, es decir, cada 10 minutos.
 - **Claves VAPID:** requiere `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT`. Sin ellas la interfaz de alertas aparece deshabilitada y el cron omite las notificaciones sin fallar.
 
 ## Configuración local
@@ -43,7 +43,7 @@ Genera el secreto con `openssl rand -hex 32` y las claves VAPID (`VAPID_PUBLIC_K
 curl -H "Authorization: Bearer <CRON_SECRET>" http://localhost:3000/api/cron
 ```
 
-Para simular el polling cada 30 minutos en local (con `npm run dev` corriendo en otra terminal):
+Para simular el polling cada 10 minutos en local (con `npm run dev` corriendo en otra terminal):
 
 ```bash
 npm run poll
@@ -63,18 +63,18 @@ npm run poll
 2. Define las variables de entorno `DATABASE_URL`, `CRON_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` (genera las claves con `npx web-push generate-vapid-keys`).
 3. Despliega y anota la URL (`https://<tu-app>.vercel.app`).
 
-### 3. Polling cada 30 minutos
+### 3. Polling cada 10 minutos
 
 **Opción recomendada: cron-job.org**
 
 1. Crea una cuenta gratuita en [cron-job.org](https://cron-job.org) y un nuevo cron job.
 2. URL: `https://<tu-app>.vercel.app/api/cron`.
-3. Frecuencia: cada 30 minutos.
+3. Frecuencia: cada 10 minutos.
 4. En *Advanced* agrega el header `Authorization` con valor `Bearer <CRON_SECRET>`.
 
 **Alternativa: GitHub Actions**
 
-El workflow `.github/workflows/poll.yml` llama al endpoint cada 30 minutos. Configura estos secretos en el repositorio (Settings > Secrets and variables > Actions):
+El workflow `.github/workflows/poll.yml` llama al endpoint cada 10 minutos. Configura estos secretos en el repositorio (Settings > Secrets and variables > Actions):
 
 - `APP_URL`: URL de la app **sin** barra final (por ejemplo `https://<tu-app>.vercel.app`).
 - `CRON_SECRET`: el mismo valor configurado en Vercel.
@@ -83,4 +83,4 @@ Ten en cuenta que las ejecuciones programadas de GitHub pueden retrasarse, y que
 
 ### Por qué no hay crons en `vercel.json`
 
-El plan Hobby de Vercel solo permite crons diarios, por lo que no sirven para una frecuencia de 30 minutos. Por eso el proyecto no incluye `vercel.json` y delega el disparo a un servicio externo (cron-job.org o GitHub Actions).
+El plan Hobby de Vercel solo permite crons diarios, por lo que no sirven para una frecuencia de 10 minutos. Por eso el proyecto no incluye `vercel.json` y delega el disparo a un servicio externo (cron-job.org o GitHub Actions).

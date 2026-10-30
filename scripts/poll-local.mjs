@@ -1,5 +1,5 @@
 const URL_CRON = process.env.POLL_URL ?? "http://localhost:3000/api/cron";
-const INTERVAL_MS = 30 * 60 * 1000;
+const INTERVAL_MS = 10 * 60 * 1000;
 const secret = process.env.CRON_SECRET;
 
 if (!secret) {
@@ -22,4 +22,4 @@ async function poll() {
 
 await poll();
 setInterval(poll, INTERVAL_MS);
-console.log("Polling every 30 minutes. Press Ctrl+C to stop.");
+console.log("Polling every 10 minutes. Press Ctrl+C to stop.");
